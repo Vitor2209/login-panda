@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Panda Login — Refined</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-1: #081310;
+    --bg-2: #12281f;
+    --card-bg: rgba(255,255,255,0.06);
+    --accent: #f6d85f;
+    --muted: #b7c1b5;
+    --glass-border: rgba(255,255,255,0.06);
+  }
+
+  body.light{
+    --bg-1: #f5f7f4;
+    --bg-2: #e6efe7;
+    --card-bg: rgba(255,255,255,0.6);
+    --accent: #b07b1a;
+    --muted: #3b4b3f;
+    --glass-border: rgba(0,0,0,0.06);
+    color: #0b1a14;
+  }
+
+  *{box-sizing:border-box;font-family:Inter, system-ui, Arial, sans-serif}
+  html,body{height:100%;}
+  body{
+    margin:0;
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:28px;
+    background: radial-gradient(1200px 600px at 10% 20%, rgba(246,216,95,0.06), transparent 6%),
+                linear-gradient(135deg,var(--bg-1), var(--bg-2));
+    transition:background 300ms ease, color 300ms ease;
+  }
+
+  .card{
+    width:100%;
+    max-width:1100px;
+    display:grid;
+    grid-template-columns: 1fr 420px;
+    gap:28px;
+    padding:32px;
+    border-radius:16px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+    border: 1px solid var(--glass-border);
+    box-shadow: 0 10px 40px rgba(3,8,6,0.6);
+    backdrop-filter: blur(10px) saturate(120%);
+    position:relative;
+    overflow:hidden;
+  }
+
+  /* top decorative waves */
+  .card::before{
+    content:"";
+    position:absolute;
+    left:-10%;
+    top:-30%;
+    width:140%;
+    height:220px;
+    background: radial-gradient(closest-side, rgba(246,216,95,0.06), transparent 40%);
+    transform: rotate(-8deg);
+    filter: blur(20px);
+    pointer-events:none;
+  }
+
+  .left{
+    padding:18px 12px 18px 28px;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+  }
+
+  .title{color:var(--accent);font-weight:700;font-size:28px;letter-spacing:0.6px}
+  .sub{color:var(--muted);margin-top:8px;font-size:14px}
+
+  .form{
+    margin-top:22px;display:flex;flex-direction:column;gap:12px;
+  }
+
+  label{font-size:13px;color:var(--muted);font-weight:600}
+  .field{
+    padding:12px 14px;border-radius:14px;background:transparent;border:1px solid rgba(255,255,255,0.06);
+    outline:none;color:inherit;font-size:15px;transition:box-shadow 160ms, border-color 160ms, transform 160ms;
+  }
+  .field:focus{border-color:var(--accent);box-shadow:0 6px 20px rgba(246,216,95,0.08);transform:translateY(-2px)}
+
+  .row{display:flex;align-items:center;justify-content:space-between;margin-top:6px}
+  .row .leftopt{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:13px}
+  .row a{color:var(--accent);text-decoration:none;font-weight:600}
+
+  .btn{
+    margin-top:10px;padding:12px 16px;border-radius:14px;background:linear-gradient(180deg,var(--accent),#ffd86b);
+    color:#081310;border:none;font-weight:700;cursor:pointer;font-size:16px;box-shadow:0 8px 24px rgba(10,16,10,0.25);
+    transition:transform 150ms, box-shadow 150ms;
+  }
+  .btn:active{transform:translateY(1px)}
+
+  /* avatar side */
+  .right{display:flex;align-items:center;justify-content:center;position:relative}
+  .avatar-wrap{width:360px;height:360px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg,var(--accent),#e8c85a);}
+  .avatar{width:86%;height:86%;border-radius:50%;overflow:hidden;display:block;transform-origin:center;animation:floaty 5s ease-in-out infinite}
+
+  @keyframes floaty{0%{transform:translateY(0) rotate(-1deg)}50%{transform:translateY() rotate(1deg)}100%{transform:translateY(0) rotate(-1deg)}}
+
+  .socials{position:absolute;right:18px;display:flex;flex-direction:column;gap:12px}
+  .social-btn{width:44px;height:44px;border-radius:50%;background:var(--card-bg);display:inline-grid;place-items:center;border:1px solid rgba(255,255,255,0.04);cursor:pointer;transition:transform 160ms, background 160ms}
+  .social-btn:hover{transform:translateX(6px);box-shadow:0 8px 18px rgba(0,0,0,0.35)}
+
+  /* subtle loading */
+  .status{margin-top:8px;font-size:14px;color:var(--muted)}
+
+  /* theme toggle */
+  .theme-toggle{position:absolute;top:18px;right:18px;background:transparent;border:1px solid rgba(255,255,255,0.04);padding:8px;border-radius:10px;cursor:pointer;color:var(--muted)}
+
+  /* success overlay */
+  .success-overlay{position:absolute;inset:0;background:linear-gradient(90deg, rgba(0,0,0,0.45), rgba(0,0,0,0.25));display:flex;align-items:center;justify-content:center;backdrop-filter: blur(4px);opacity:0;pointer-events:none;transition:opacity 240ms}
+  .success-overlay.show{opacity:1;pointer-events:auto}
+  .success-card{background:var(--card-bg);padding:24px;border-radius:12px;border:1px solid var(--glass-border);text-align:center}
+
+  /* responsiveness */
+  @media (max-width:980px){
+    .card{grid-template-columns:1fr;max-width:820px;padding:24px}
+    .right{order:-1;margin-bottom:4px}
+    .avatar-wrap{width:260px;height:260px}
+  }
+
+  @media (max-width:420px){
+    .avatar-wrap{width:200px;height:200px}
+    .title{font-size:20px}
+    .card{padding:18px}
+  }
+
+</style>
+</head>
+<body>
+
+<div class="card" id="card">
+  <button class="theme-toggle" id="toggleTheme">Toggle Theme</button>
+
+  <div class="left">
+    <div class="title">WELCOME BACK!</div>
+    <div class="sub">Don't have an account? <a href="#">Sign up</a></div>
+
+    <form class="form" id="loginForm">
+      <div>
+        <label for="email">Username</label>
+        <input id="email" class="field" name="email" type="email" placeholder="example@gmail.com" required>
+      </div>
+
+      <div>
+        <label for="password">Password</label>
+        <input id="password" class="field" name="password" type="password" placeholder="••••••••" required>
+      </div>
+
+      <div class="row">
+        <div class="leftopt"><input type="checkbox" id="remember"> <label for="remember">Remember me</label></div>
+        <a href="#">Forgot password?</a>
+      </div>
+
+      <button type="submit" class="btn">Sign In</button>
+      <div class="status" id="status">&nbsp;</div>
+    </form>
+  </div>
+
+  <div class="right">
+    <div class="avatar-wrap">
+      <!-- you can replace the src with any avatar url or local file -->
+      <img class="avatar" id="avatar" src="src/img/b640d540670ac9a2905f359898d7f5c8.jpg" alt="Panda Avatar">
+    </div>
+
+    <div class="socials">
+      <button class="social-btn" title="Twitter" >T</button>
+      <button class="social-btn" title="Facebook">F</button>
+      <button class="social-btn" title="Instagram">I</button>
+    </div>
+  </div>
+
+  <div class="success-overlay" id="successOverlay">
+    <div class="success-card" id="successCard">
+      <h3 style="color:var(--accent)">Welcome!</h3>
+      <p style="color:var(--muted);margin-top:6px">You are now logged in.</p>
+      <div style="margin-top:12px;display:flex;gap:8px;justify-content:center">
+        <button class="btn" id="continueBtn">Continue</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  // THEME: persist preference
+  const body = document.body;
+  const toggle = document.getElementById('toggleTheme');
+  const saved = localStorage.getItem('panda-theme');
+  if(saved === 'light') body.classList.add('light');
+
+  toggle.addEventListener('click', () => {
+    body.classList.toggle('light');
+    localStorage.setItem('panda-theme', body.classList.contains('light') ? 'light' : 'dark');
+  });
+
+  // FAKE BACKEND
+  const mockUsers = [
+    {email: 'user@example.com', password: 'password123', name: 'Panda User'},
+    {email: 'alice@example.com', password: 'alicepass', name: 'Alice'}
+  ];
+
+  const form = document.getElementById('loginForm');
+  const status = document.getElementById('status');
+  const overlay = document.getElementById('successOverlay');
+  const continueBtn = document.getElementById('continueBtn');
+
+  function fakeRequest(email, pass){
+    // returns a promise that resolves/rejects after a short delay
+    return new Promise((resolve, reject) => {
+      status.textContent = 'Contacting server...';
+      setTimeout(() => {
+        const found = mockUsers.find(u => u.email === email && u.password === pass);
+        if(found) resolve(found);
+        else reject(new Error('Invalid credentials'));
+      }, 900);
+    });
+  }
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    status.textContent = '';
+    const email = form.email.value.trim();
+    const pass = form.password.value.trim();
+
+    // basic UI feedback
+    status.textContent = 'Verifying...';
+
+    try{
+      const user = await fakeRequest(email, pass);
+      // store token locally (fake)
+      localStorage.setItem('panda-token', btoa(email + ':' + Date.now()));
+      status.textContent = 'Success! Redirecting...';
+
+      // subtle animation on avatar
+      const avatar = document.getElementById('avatar');
+      avatar.animate([
+        {transform: 'scale(1) rotate(0deg)'},
+        {transform: 'scale(1.06) rotate(-6deg)'},
+        {transform: 'scale(1) rotate(0deg)'}
+      ], {duration:800, easing:'ease-out'});
+
+      // show overlay
+      setTimeout(()=>{
+        overlay.classList.add('show');
+      }, 500);
+
+    }catch(err){
+      status.textContent = 'Login failed: ' + err.message;
+      status.style.color = '#f6b5b5';
+      setTimeout(()=>{ status.style.color = ''; status.textContent=''; }, 2400);
+    }
+  });
+
+  continueBtn.addEventListener('click', ()=>{
+    // fake continue -> close overlay
+    overlay.classList.remove('show');
+    status.textContent = 'Welcome back!';
+  });
+
+  // allow image replacement by clicking avatar
+  const avatarImg = document.getElementById('avatar');
+  avatarImg.addEventListener('click', ()=>{
+    const url = prompt('Paste avatar image URL (or leave to cancel):');
+    if(url) avatarImg.src = url;
+  });
+
+</script>
+
+</body>
+</html>
